@@ -117,9 +117,14 @@ class _CommandInputState extends State<CommandInput> {
       return KeyEventResult.handled;
     }
 
-    // Escape = focus terminal
+    // Escape = focus terminal and unfocus input
     if (key == LogicalKeyboardKey.escape) {
-      widget.onFocusTerminal?.call();
+      // Unfocus the command input
+      _focusNode.unfocus();
+      // Delay slightly to ensure unfocus completes before focusing terminal
+      Future.delayed(const Duration(milliseconds: 10), () {
+        widget.onFocusTerminal?.call();
+      });
       return KeyEventResult.handled;
     }
 

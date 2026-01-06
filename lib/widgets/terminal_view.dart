@@ -150,43 +150,58 @@ class _SSHTerminalWidgetState extends State<SSHTerminalWidget> {
             padding: const EdgeInsets.all(4),
             child: Stack(
               children: [
-                Focus(
-                  focusNode: _terminalFocusNode,
-                  child: TerminalView(
-                    _terminal,
-                    textStyle: TerminalStyle(
-                      // D2Coding Nerd Font (pre-patched with Nerd Font icons)
-                      fontFamily: 'D2CodingNerdFont',
-                      fontSize: terminalFontSize,
-                      height: 1.2,
+                // TerminalView with GestureDetector for focus handling
+                GestureDetector(
+                  onTap: _focusTerminal,
+                  child: Focus(
+                    focusNode: _terminalFocusNode,
+                    onKeyEvent: (node, event) {
+                      // Pass key events to the terminal
+                      return KeyEventResult.ignored;
+                    },
+                    child: TerminalView(
+                      _terminal,
+                      textStyle: TerminalStyle(
+                        // D2Coding Nerd Font (pre-patched with Nerd Font icons)
+                        fontFamily: 'D2CodingNerdFont',
+                        // Fallback fonts for Korean character support
+                        fontFamilyFallback: const [
+                          'Malgun Gothic',
+                          'Apple SD Gothic Neo',
+                          'Noto Sans KR',
+                          'sans-serif',
+                        ],
+                        fontSize: terminalFontSize,
+                        height: 1.2,
+                      ),
+                      theme: TerminalTheme(
+                        cursor: AppColors.rosewater,
+                        selection: AppColors.surface2.withValues(alpha: 0.5),
+                        foreground: AppColors.text,
+                        background: AppColors.base,
+                        black: AppColors.surface1,
+                        red: AppColors.red,
+                        green: AppColors.green,
+                        yellow: AppColors.yellow,
+                        blue: AppColors.blue,
+                        magenta: AppColors.pink,
+                        cyan: AppColors.teal,
+                        white: AppColors.subtext1,
+                        brightBlack: AppColors.surface2,
+                        brightRed: AppColors.red,
+                        brightGreen: AppColors.green,
+                        brightYellow: AppColors.yellow,
+                        brightBlue: AppColors.blue,
+                        brightMagenta: AppColors.pink,
+                        brightCyan: AppColors.teal,
+                        brightWhite: AppColors.subtext0,
+                        searchHitBackground: AppColors.yellow.withValues(alpha: 0.3),
+                        searchHitBackgroundCurrent: AppColors.peach.withValues(alpha: 0.5),
+                        searchHitForeground: AppColors.base,
+                      ),
+                      autofocus: true,
+                      alwaysShowCursor: true,
                     ),
-                    theme: TerminalTheme(
-                      cursor: AppColors.rosewater,
-                      selection: AppColors.surface2.withValues(alpha: 0.5),
-                      foreground: AppColors.text,
-                      background: AppColors.base,
-                      black: AppColors.surface1,
-                      red: AppColors.red,
-                      green: AppColors.green,
-                      yellow: AppColors.yellow,
-                      blue: AppColors.blue,
-                      magenta: AppColors.pink,
-                      cyan: AppColors.teal,
-                      white: AppColors.subtext1,
-                      brightBlack: AppColors.surface2,
-                      brightRed: AppColors.red,
-                      brightGreen: AppColors.green,
-                      brightYellow: AppColors.yellow,
-                      brightBlue: AppColors.blue,
-                      brightMagenta: AppColors.pink,
-                      brightCyan: AppColors.teal,
-                      brightWhite: AppColors.subtext0,
-                      searchHitBackground: AppColors.yellow.withValues(alpha: 0.3),
-                      searchHitBackgroundCurrent: AppColors.peach.withValues(alpha: 0.5),
-                      searchHitForeground: AppColors.base,
-                    ),
-                    autofocus: true,
-                    alwaysShowCursor: true,
                   ),
                 ),
                 if (_status == ConnectionStatus.connecting)
