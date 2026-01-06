@@ -1,0 +1,162 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Build Windows
+        run: flutter build windows --release
+
+      - name: Create Windows package
+        shell: powershell
+        run: |
+          $buildDir = "build\windows\runner\Release"
+          $outputDir = "windows-release"
+          $zipName = "term-deck-windows-x64.zip"
+          
+          New-Item -ItemType Directory -Force -Path $outputDir | Out-Null
+          Copy-Item -Path $buildDir -Destination "$outputDir\term-deck" -Recurse
+          
+          Compress-Archive -Path "$outputDir\term-deck" -DestinationPath $zipName
+          Remove-Item -Path $outputDir -Recurse -Force
+
+      - name: Upload Windows artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-release
+          path: term-deck-windows-x64.zip
+
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Linux dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libgtk-3-dev \
+            libblkid-dev \
+            liblzma-dev \
+            ninja-build
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Build Linux
+        run: flutter build linux --release
+
+      - name: Create Linux package
+        run: |
+          buildDir="build/linux/x64/release/bundle"
+          outputDir="linux-release"
+          tarName="term-deck-linux-x64.tar.gz"
+          
+          mkdir -p "$outputDir"
+          cp -r "$buildDir" "$outputDir/term-deck"
+          
+          cd "$outputDir"
+          tar -czf "../$tarName" term-deck
+          cd ..
+          rm -rf "$outputDir"
+
+      - name: Upload Linux artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-release
+          path: term-deck-linux-x64.tar.gz
+
+  build-macos:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Build macOS
+        run: flutter build macos --release
+
+      - name: Create macOS package
+        run: |
+          buildDir="build/macos/Build/Products/Release"
+          outputDir="macos-release"
+          zipName="term-deck-macos-x64.zip"
+          
+          mkdir -p "$outputDir"
+          cp -r "$buildDir/term-deck.app" "$outputDir/"
+          
+          cd "$outputDir"
+          zip -r "../$zipName" term-deck.app
+          cd ..
+          rm -rf "$outputDir"
+
+      - name: Upload macOS artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-release
+          path: term-deck-macos-x64.zip
+
+  release:
+    needs: [build-windows, build-linux, build-macos]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download Windows artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: windows-release
+          path: ./artifacts
+
+      - name: Download Linux artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: linux-release
+          path: ./artifacts
+
+      - name: Download macOS artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: macos-release
+          path: ./artifacts
+
+      - name: List artifacts
+        run: ls -lR ./artifacts
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ./artifacts/*
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

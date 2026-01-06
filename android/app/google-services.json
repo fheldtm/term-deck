@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "658607474826",
+    "project_id": "webterminal-2b312",
+    "storage_bucket": "webterminal-2b312.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:658607474826:android:a041607c0f1dd8420bc573",
+        "android_client_info": {
+          "package_name": "com.termdeck.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAotRztWO_ztnlCGpJbUXtc_HMxx8HVn5U"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
