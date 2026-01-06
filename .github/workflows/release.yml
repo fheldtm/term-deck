@@ -26,7 +26,7 @@ jobs:
       - name: Create Windows package
         shell: powershell
         run: |
-          $buildDir = "build\windows\runner\Release"
+          $buildDir = "build\windows\x64\runner\Release"
           $outputDir = "windows-release"
           $zipName = "term-deck-windows-x64.zip"
           
