@@ -26,6 +26,29 @@ jobs:
       - name: Build Windows
         run: flutter build windows --release
 
+      - name: Copy Visual C++ Runtime DLLs
+        shell: powershell
+        run: |
+          $buildDir = "build\windows\x64\runner\Release"
+          
+          # List of DLLs to copy
+          $dlls = @("msvcp140.dll", "vcruntime140.dll", "vcruntime140_1.dll")
+          
+          # Try to copy from System32 first
+          $dllSourceDir = "C:\Windows\System32"
+          
+          foreach ($dll in $dlls) {
+            $sourcePath = Join-Path $dllSourceDir $dll
+            $destPath = Join-Path $buildDir $dll
+            
+            if (Test-Path $sourcePath) {
+              Write-Host "Copying $dll from $sourcePath to $buildDir"
+              Copy-Item -Path $sourcePath -Destination $destPath -Force
+            } else {
+              Write-Host "Warning: $dll not found in $dllSourceDir"
+            }
+          }
+
       - name: Create Windows package
         shell: powershell
         run: |
